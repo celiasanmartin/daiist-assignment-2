@@ -12,15 +12,17 @@ import pandas as pd
 OUT = Path(__file__).resolve().parent / "outputs"
 
 # ===================== COSTES (EDITA AQUÍ) =====================
-PROVISIONAL = True
-C_FN = 200.0     # EUR: placa defectuosa que pasa sin que nadie la pare
-C_FP = 15.0      # EUR: placa buena rechazada automáticamente
-C_TP = 0.0       # EUR: tratar una placa defectuosa bien detectada
-C_TN = 0.0       # EUR: placa buena que pasa
-C_REVIEW = 1.5   # EUR: una revisión humana (se asume que la persona acierta)
+PROVISIONAL = False
+# Escenario: placas de control industrial, línea de ~5.000 placas/día.
+C_FN = 150.0    # EUR: defectuosa que llega al cliente (sustitución, reparación, devolución, garantía, reputación)
+C_FP = 12.0     # EUR: buena rechazada (reinspección y, a veces, descarte o daño al retrabajar)
+C_TP = 8.0      # EUR: retrabajo en fábrica de una defectuosa bien detectada
+C_TN = 0.0      # EUR: buena que pasa
+MIN_PER_REVIEW = 1.0         # minutos por revisión (defectos muy pequeños)
+EUR_PER_MIN = 0.5            # EUR/min de un revisor (~30 EUR/h con cargas)
+C_REVIEW = MIN_PER_REVIEW * EUR_PER_MIN   # EUR por revisión; se asume que la persona acierta
 BASE_RATE = 0.03             # fracción REAL de placas defectuosas en producción
-BOARDS_PER_DAY = 20000       # placas diarias en la línea
-MIN_PER_REVIEW = 0.5         # minutos que tarda una revisión
+BOARDS_PER_DAY = 5000        # placas diarias en la línea
 MIN_PER_PERSON_DAY = 420     # minutos útiles de revisión por persona y día
 # ================================================================
 
