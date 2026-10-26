@@ -22,7 +22,7 @@ VERSION = 5
 
 # --- Ajustes de entrenamiento (anótalos en REPORT.md) ---
 MODEL = "yolo11n.pt"
-EPOCHS = 30
+EPOCHS = 8
 IMGSZ = 640
 BATCH = 16
 FRACTION = 1.0  # baja a 0.3 para una prueba rápida
