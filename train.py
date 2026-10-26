@@ -104,18 +104,25 @@ def instances_per_class(names):
     return counts
 
 
-def image_scores(weights, tag):
+def image_scores(weights, tag, chunk=64):
     """Puntuación por placa = confianza máxima de cualquier detección.
-    Positivo (real) = la placa tiene al menos un defecto etiquetado."""
+    Positivo (real) = la placa tiene al menos un defecto etiquetado.
+    Se procesa en trozos para no agotar la RAM."""
+    import gc
     model = YOLO(weights)
     imgs = sorted((DATA / "test_clean" / "images").iterdir())
     rows = []
-    for res in model.predict([str(p) for p in imgs], conf=0.001, imgsz=IMGSZ,
-                             stream=True, verbose=False):
-        name = Path(res.path).name
-        n_gt = gt_count(DATA / "test_clean" / "labels" / (Path(name).stem + ".txt"))
-        score = float(res.boxes.conf.max()) if len(res.boxes) else 0.0
-        rows.append((name, int(n_gt > 0), n_gt, round(score, 5)))
+    for i in range(0, len(imgs), chunk):
+        batch = [str(p) for p in imgs[i:i + chunk]]
+        results = model.predict(batch, conf=0.001, imgsz=IMGSZ, max_det=50,
+                                verbose=False, save=False)
+        for res in results:
+            name = Path(res.path).name
+            n_gt = gt_count(DATA / "test_clean" / "labels" / (Path(name).stem + ".txt"))
+            score = float(res.boxes.conf.max()) if len(res.boxes) else 0.0
+            rows.append((name, int(n_gt > 0), n_gt, round(score, 5)))
+        del results
+        gc.collect()
     OUT.mkdir(exist_ok=True)
     with open(OUT / f"scores_{tag}.csv", "w", newline="") as f:
         w = csv.writer(f)
